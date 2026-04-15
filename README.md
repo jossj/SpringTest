@@ -21,6 +21,11 @@ java -jar target/spring-test-0.0.1-SNAPSHOT.jar
 |----------|---------------|-------------|
 | GET `/api/public/hello` | No | Public endpoint |
 | GET `/api/secure` | Yes | Requires authentication |
+| GET `/api/users` | Yes | List all users |
+| GET `/api/users/{id}` | Yes | Get user by ID |
+| POST `/api/users` | Yes | Create new user |
+| PUT `/api/users/{id}` | Yes | Update user |
+| DELETE `/api/users/{id}` | Yes | Delete user |
 
 ## Default Credentials
 
