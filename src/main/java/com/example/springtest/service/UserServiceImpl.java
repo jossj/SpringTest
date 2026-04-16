@@ -1,5 +1,6 @@
 package com.example.springtest.service;
 
+import com.example.springtest.exception.ResourceNotFoundException;
 import com.example.springtest.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class UserServiceImpl implements UserService {
         log.info("Updating user with id: {}", id);
         User existingUser = database.get(id);
         if (existingUser == null) {
-            throw new RuntimeException("User not found with id: " + id);
+            throw new ResourceNotFoundException("User not found with id: " + id);
         }
         
         User updatedUser = User.builder()
@@ -76,7 +77,7 @@ public class UserServiceImpl implements UserService {
         log.info("Deleting user with id: {}", id);
         User removed = database.remove(id);
         if (removed == null) {
-            throw new RuntimeException("User not found with id: " + id);
+            throw new ResourceNotFoundException("User not found with id: " + id);
         }
     }
 }
