@@ -1,4 +1,4 @@
-package com.example.springtest;
+package com.example.springtest.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +13,17 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .httpBasic();
-        
+            .httpBasic(httpBasic -> {})
+            // Allow H2 console to render in iframe
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+            // Disable CSRF for H2 console and API
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/h2-console/**", "/api/**")
+            );
+
         return http.build();
     }
 }
