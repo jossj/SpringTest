@@ -1,4 +1,4 @@
-package com.example.springtest;
+package com.example.springtest.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,11 +12,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/public/**", "/login", "/css/**", "/js/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .httpBasic();
-        
+            .formLogin(form -> form
+                .loginPage("/login")
+                .defaultSuccessUrl("/dashboard", true)
+                .permitAll()
+            )
+            .httpBasic(basic -> {});
+
         return http.build();
     }
 }

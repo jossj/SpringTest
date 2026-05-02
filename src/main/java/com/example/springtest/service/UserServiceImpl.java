@@ -1,82 +1,60 @@
 package com.example.springtest.service;
 
 import com.example.springtest.model.User;
+import com.example.springtest.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final Map<Long, User> database = new ConcurrentHashMap<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
-
-    public UserServiceImpl() {
-        // Seed some initial data
-        createUser(User.builder().username("alice").email("alice@example.com").role("USER").build());
-        createUser(User.builder().username("bob").email("bob@example.com").role("USER").build());
-        createUser(User.builder().username("admin").email("admin@example.com").role("ADMIN").build());
-    }
+    private final UserRepository userRepository;
 
     @Override
     public List<User> getAllUsers() {
         log.info("Fetching all users");
-        return new ArrayList<>(database.values());
+        return userRepository.findAll();
     }
 
     @Override
     public Optional<User> getUserById(Long id) {
         log.info("Fetching user with id: {}", id);
-        return Optional.ofNullable(database.get(id));
+        return userRepository.findById(id);
     }
 
     @Override
     public User createUser(User user) {
-        Long id = idGenerator.getAndIncrement();
-        User newUser = User.builder()
-                .id(id)
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .role(user.getRole() != null ? user.getRole() : "USER")
-                .build();
-        database.put(id, newUser);
-        log.info("Created user: {}", newUser);
-        return newUser;
+        if (user.getRole() == null) user.setRole("USER");
+        User saved = userRepository.save(user);
+        log.info("Created user: {}", saved);
+        return saved;
     }
 
     @Override
     public User updateUser(Long id, User user) {
         log.info("Updating user with id: {}", id);
-        User existingUser = database.get(id);
-        if (existingUser == null) {
-            throw new RuntimeException("User not found with id: " + id);
-        }
-        
-        User updatedUser = User.builder()
-                .id(id)
-                .username(user.getUsername() != null ? user.getUsername() : existingUser.getUsername())
-                .email(user.getEmail() != null ? user.getEmail() : existingUser.getEmail())
-                .role(user.getRole() != null ? user.getRole() : existingUser.getRole())
-                .build();
-        
-        database.put(id, updatedUser);
-        log.info("Updated user: {}", updatedUser);
-        return updatedUser;
+        User existing = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        if (user.getUsername() != null) existing.setUsername(user.getUsername());
+        if (user.getEmail() != null) existing.setEmail(user.getEmail());
+        if (user.getRole() != null) existing.setRole(user.getRole());
+        User saved = userRepository.save(existing);
+        log.info("Updated user: {}", saved);
+        return saved;
     }
 
     @Override
     public void deleteUser(Long id) {
         log.info("Deleting user with id: {}", id);
-        User removed = database.remove(id);
-        if (removed == null) {
+        if (!userRepository.existsById(id)) {
             throw new RuntimeException("User not found with id: " + id);
         }
+        userRepository.deleteById(id);
     }
 }
