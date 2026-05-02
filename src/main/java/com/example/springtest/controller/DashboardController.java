@@ -19,6 +19,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DashboardController {
 
+    public static class RewardRow {
+        public final String username;
+        public final List<Integer> typePoints;
+        public final int total;
+        RewardRow(String username, List<Integer> typePoints, int total) {
+            this.username = username;
+            this.typePoints = typePoints;
+            this.total = total;
+        }
+    }
+
     private final UserService userService;
     private final RewardService rewardService;
 
@@ -51,17 +62,14 @@ public class DashboardController {
                         )
                 ));
 
-        // Flatten into one map per row so the template only needs a single map lookup
-        List<Map<String, Object>> rewardRows = new ArrayList<>(leaderboard.keySet()).stream()
+        // Build rows as typed objects so the template iterates a List — no variable map key lookups
+        List<RewardRow> rewardRows = new ArrayList<>(leaderboard.keySet()).stream()
                 .map(username -> {
-                    Map<String, Object> row = new LinkedHashMap<>();
-                    row.put("username", username);
                     Map<String, Integer> typeMap = pointsByUserAndType.getOrDefault(username, Collections.emptyMap());
-                    for (String type : rewardTypes) {
-                        row.put(type, typeMap.get(type));
-                    }
-                    row.put("total", leaderboard.get(username));
-                    return row;
+                    List<Integer> typePoints = rewardTypes.stream()
+                            .map(typeMap::get)
+                            .collect(Collectors.toList());
+                    return new RewardRow(username, typePoints, leaderboard.get(username));
                 })
                 .collect(Collectors.toList());
 
