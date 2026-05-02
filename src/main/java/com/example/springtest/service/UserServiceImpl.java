@@ -1,5 +1,6 @@
 package com.example.springtest.service;
 
+import com.example.springtest.exception.ResourceNotFoundException;
 import com.example.springtest.model.User;
 import com.example.springtest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
