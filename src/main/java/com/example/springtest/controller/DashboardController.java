@@ -40,7 +40,8 @@ public class DashboardController {
 
         // per-user, per-type points matrix for the Rewards tile (string keys for Thymeleaf map lookup)
         List<String> rewardTypes = Arrays.stream(RewardType.values()).map(Enum::name).collect(Collectors.toList());
-        Map<String, Map<String, Integer>> rewardMatrix = rewards.stream()
+
+        Map<String, Map<String, Integer>> pointsByUserAndType = rewards.stream()
                 .filter(r -> r.getUser() != null && r.getType() != null)
                 .collect(Collectors.groupingBy(
                         r -> r.getUser().getUsername(),
@@ -50,7 +51,19 @@ public class DashboardController {
                         )
                 ));
 
-        List<String> rewardUsers = new ArrayList<>(leaderboard.keySet());
+        // Flatten into one map per row so the template only needs a single map lookup
+        List<Map<String, Object>> rewardRows = new ArrayList<>(leaderboard.keySet()).stream()
+                .map(username -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("username", username);
+                    Map<String, Integer> typeMap = pointsByUserAndType.getOrDefault(username, Collections.emptyMap());
+                    for (String type : rewardTypes) {
+                        row.put(type, typeMap.get(type));
+                    }
+                    row.put("total", leaderboard.get(username));
+                    return row;
+                })
+                .collect(Collectors.toList());
 
         model.addAttribute("users", users);
         model.addAttribute("rewards", rewards);
@@ -59,8 +72,7 @@ public class DashboardController {
         model.addAttribute("totalPoints", totalPoints);
         model.addAttribute("leaderboard", leaderboard);
         model.addAttribute("rewardTypes", rewardTypes);
-        model.addAttribute("rewardMatrix", rewardMatrix);
-        model.addAttribute("rewardUsers", rewardUsers);
+        model.addAttribute("rewardRows", rewardRows);
         return "dashboard";
     }
 }
