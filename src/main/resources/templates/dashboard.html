@@ -2,97 +2,265 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <title>Admin Dashboard</title>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <style>
-        body { background: #f0f2f5; }
-        .navbar { background: #1a1a2e; }
-        .stat-card { border: none; border-radius: 12px; }
-        .stat-card .icon { font-size: 2rem; opacity: .8; }
-        .table th { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; }
-        .badge-admin { background: #6f42c1; }
-        .badge-user  { background: #0d6efd; }
-        .card { border: none; border-radius: 12px; }
-        .rank-medal { font-size: 1.1rem; }
-        .leaderboard-bar { height: 6px; border-radius: 3px; background: #e9ecef; }
-        .leaderboard-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #f6c90e, #ff9500); }
+        /* ── Base ───────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            background: #f1f5f9;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: #1e293b;
+            font-size: .9rem;
+        }
+
+        /* ── Navbar ─────────────────────────────────────────── */
+        .app-navbar {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+            box-shadow: 0 2px 12px rgba(0,0,0,.3);
+            padding: .75rem 2rem;
+        }
+        .nav-brand-icon {
+            width: 38px; height: 38px;
+            background: rgba(59,130,246,.25);
+            border: 1px solid rgba(59,130,246,.4);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; color: #93c5fd;
+        }
+        .nav-brand-name  { font-size: 1rem; font-weight: 700; color: #f8fafc; letter-spacing: -.01em; }
+        .nav-brand-sub   { font-size: .7rem; color: #94a3b8; letter-spacing: .04em; text-transform: uppercase; }
+        .nav-date        { font-size: .75rem; color: #94a3b8; }
+        .btn-logout {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: .8rem;
+            font-weight: 500;
+            padding: .4rem .9rem;
+            transition: background .15s;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,.16); color: #fff; }
+
+        /* ── Layout ─────────────────────────────────────────── */
+        .page-body { padding: 0 1.75rem 2.5rem; }
+
+        /* ── Cards ──────────────────────────────────────────── */
+        .card {
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.05);
+            background: #fff;
+        }
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #f1f5f9;
+            border-radius: 14px 14px 0 0 !important;
+            padding: 1rem 1.25rem;
+        }
+        .card-header-title {
+            font-size: .8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .card-header-icon {
+            width: 28px; height: 28px;
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .85rem;
+        }
+        .icon-blue   { background: #eff6ff; color: #3b82f6; }
+        .icon-green  { background: #f0fdf4; color: #16a34a; }
+        .icon-amber  { background: #fffbeb; color: #d97706; }
+        .icon-violet { background: #f5f3ff; color: #7c3aed; }
+        .icon-cyan   { background: #ecfeff; color: #0891b2; }
+
+        /* ── Stat cards ─────────────────────────────────────── */
+        .stat-card {
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.05);
+            padding: 1.25rem 1.5rem;
+            background: #fff;
+            display: flex; align-items: center; gap: 1rem;
+            transition: transform .18s, box-shadow .18s;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,.1); }
+        .stat-icon {
+            width: 52px; height: 52px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+        .stat-value { font-size: 1.75rem; font-weight: 700; line-height: 1; letter-spacing: -.02em; }
+        .stat-label { font-size: .75rem; color: #94a3b8; font-weight: 500; margin-top: .2rem; text-transform: uppercase; letter-spacing: .05em; }
+
+        /* ── Leaderboard ────────────────────────────────────── */
+        .lb-bar       { height: 5px; border-radius: 3px; background: #f1f5f9; overflow: hidden; }
+        .lb-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .lb-name      { font-size: .85rem; font-weight: 600; }
+        .lb-pts       { font-size: .75rem; color: #94a3b8; }
+        .lb-rank      { font-size: 1.15rem; min-width: 28px; text-align: center; }
+
+        /* ── Tables ─────────────────────────────────────────── */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table thead tr { border-bottom: 2px solid #f1f5f9; }
+        .data-table th {
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: #94a3b8;
+            padding: .75rem 1rem;
+        }
+        .data-table td { padding: .7rem 1rem; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table tbody tr:hover td { background: #f8fafc; }
+
+        /* ── Badges ─────────────────────────────────────────── */
+        .badge { font-size: .7rem; font-weight: 600; padding: .3em .65em; border-radius: 6px; }
+        .badge-admin  { background: #ede9fe; color: #7c3aed; }
+        .badge-user   { background: #eff6ff; color: #3b82f6; }
+        .badge-pts    { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .badge-total  { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+
+        /* ── Form ───────────────────────────────────────────── */
+        .form-label { font-size: .75rem; font-weight: 600; color: #475569; margin-bottom: .3rem; text-transform: uppercase; letter-spacing: .04em; }
+        .form-control, .form-select {
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
+            font-size: .85rem;
+            padding: .55rem .85rem;
+            color: #1e293b;
+            background: #f8fafc;
+            transition: border-color .15s, box-shadow .15s, background .15s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+            outline: none;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            border: none;
+            border-radius: 9px;
+            color: #fff;
+            font-weight: 600;
+            font-size: .85rem;
+            padding: .6rem 1rem;
+            width: 100%;
+            transition: opacity .15s, transform .1s, box-shadow .15s;
+            box-shadow: 0 2px 6px rgba(59,130,246,.35);
+        }
+        .btn-submit:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,.4); }
+        .btn-submit:active { transform: translateY(0); }
+
+        /* ── Empty state ────────────────────────────────────── */
+        .empty-state { padding: 2.5rem 1rem; color: #cbd5e1; }
+        .empty-state i { font-size: 2.5rem; display: block; margin-bottom: .5rem; }
+        .empty-state span { font-size: .82rem; }
+
+        /* ── Section divider ────────────────────────────────── */
+        .section-gap { margin-top: 1.5rem; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark px-4 py-3 mb-4">
-    <span class="navbar-brand fw-bold"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</span>
-    <form th:action="@{/logout}" method="post" class="m-0">
-        <button type="submit" class="btn btn-outline-light btn-sm">
-            <i class="bi bi-box-arrow-right me-1"></i>Logout
-        </button>
-    </form>
+<!-- Navbar -->
+<nav class="app-navbar d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="nav-brand-icon"><i class="bi bi-speedometer2"></i></div>
+        <div>
+            <div class="nav-brand-name">RewardTrack</div>
+            <div class="nav-brand-sub">Admin Dashboard</div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <span class="nav-date d-none d-md-block" id="navDate"></span>
+        <form th:action="@{/logout}" method="post" class="m-0">
+            <button type="submit" class="btn-logout">
+                <i class="bi bi-box-arrow-right me-1"></i>Sign out
+            </button>
+        </form>
+    </div>
 </nav>
 
-<div class="container-fluid px-4">
+<div class="page-body">
 
     <!-- Stat cards -->
     <div class="row g-3 mb-4">
         <div class="col-sm-4">
-            <div class="card stat-card shadow-sm p-3 d-flex flex-row align-items-center gap-3">
-                <div class="icon text-primary"><i class="bi bi-people-fill"></i></div>
+            <div class="stat-card">
+                <div class="stat-icon icon-blue"><i class="bi bi-people-fill"></i></div>
                 <div>
-                    <div class="fs-4 fw-bold" th:text="${userCount}">0</div>
-                    <div class="text-muted small">Total Users</div>
+                    <div class="stat-value" th:text="${userCount}">0</div>
+                    <div class="stat-label">Total Users</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="card stat-card shadow-sm p-3 d-flex flex-row align-items-center gap-3">
-                <div class="icon text-success"><i class="bi bi-trophy-fill"></i></div>
+            <div class="stat-card">
+                <div class="stat-icon icon-green"><i class="bi bi-trophy-fill"></i></div>
                 <div>
-                    <div class="fs-4 fw-bold" th:text="${rewardCount}">0</div>
-                    <div class="text-muted small">Total Rewards</div>
+                    <div class="stat-value" th:text="${rewardCount}">0</div>
+                    <div class="stat-label">Total Rewards</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="card stat-card shadow-sm p-3 d-flex flex-row align-items-center gap-3">
-                <div class="icon text-warning"><i class="bi bi-star-fill"></i></div>
+            <div class="stat-card">
+                <div class="stat-icon icon-amber"><i class="bi bi-star-fill"></i></div>
                 <div>
-                    <div class="fs-4 fw-bold" th:text="${totalPoints}">0</div>
-                    <div class="text-muted small">Points Awarded</div>
+                    <div class="stat-value" th:text="${totalPoints}">0</div>
+                    <div class="stat-label">Points Awarded</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Leaderboard card -->
+    <!-- Leaderboard -->
     <div class="row g-3 mb-4">
         <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white py-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-bar-chart-fill text-warning fs-5"></i>
-                    <h6 class="mb-0 fw-semibold">Points Leaderboard</h6>
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="card-header-title">
+                        <div class="card-header-icon icon-amber"><i class="bi bi-bar-chart-fill"></i></div>
+                        Points Leaderboard
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div th:if="${#maps.isEmpty(leaderboard)}" class="text-center text-muted py-2">No data yet</div>
+                <div class="card-body py-3 px-4">
+                    <div th:if="${#maps.isEmpty(leaderboard)}" class="empty-state text-center">
+                        <i class="bi bi-bar-chart-line"></i><span>No leaderboard data yet.</span>
+                    </div>
                     <div class="row g-3" th:if="${not #maps.isEmpty(leaderboard)}">
-                        <div class="col-md-4 col-sm-6"
-                             th:each="entry, iter : ${leaderboard}">
+                        <div class="col-md-4 col-sm-6" th:each="entry, iter : ${leaderboard}">
                             <div class="d-flex align-items-center gap-3">
-                                <span class="rank-medal fw-bold text-muted" style="min-width:1.5rem; text-align:right">
+                                <span class="lb-rank">
                                     <span th:if="${iter.index == 0}">🥇</span>
                                     <span th:if="${iter.index == 1}">🥈</span>
                                     <span th:if="${iter.index == 2}">🥉</span>
-                                    <span th:if="${iter.index > 2}" th:text="${iter.index + 1} + '.'"></span>
+                                    <span th:if="${iter.index > 2}" class="lb-pts fw-semibold" th:text="${iter.index + 1} + '.'"></span>
                                 </span>
                                 <div class="flex-grow-1">
                                     <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-semibold small" th:text="${entry.key}"></span>
-                                        <span class="small text-muted" th:text="${entry.value} + ' pts'"></span>
+                                        <span class="lb-name" th:text="${entry.key}"></span>
+                                        <span class="lb-pts" th:text="${entry.value} + ' pts'"></span>
                                     </div>
-                                    <div class="leaderboard-bar">
-                                        <div class="leaderboard-bar-fill"
+                                    <div class="lb-bar">
+                                        <div class="lb-bar-fill"
                                              th:style="'width:' + (${totalPoints} > 0 ? (${entry.value} * 100 / ${totalPoints}) : 0) + '%'"></div>
                                     </div>
                                 </div>
@@ -104,54 +272,65 @@
         </div>
     </div>
 
-    <div class="row g-4">
-
-        <!-- Rewards tile -->
+    <!-- Rewards by Behavior -->
+    <div class="row g-3 mb-4">
         <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h6 class="mb-0 fw-semibold"><i class="bi bi-trophy me-2 text-success"></i>Rewards by Behavior</h6>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-title">
+                        <div class="card-header-icon icon-green"><i class="bi bi-trophy-fill"></i></div>
+                        Rewards by Behavior
+                    </div>
                 </div>
                 <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
+                    <table class="data-table">
+                        <thead>
                             <tr>
-                                <th class="ps-3">User</th>
+                                <th class="ps-4">User</th>
                                 <th th:each="type : ${rewardTypes}" th:text="${type}"></th>
-                                <th class="fw-bold">Total</th>
+                                <th>Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="row : ${rewardRows}">
-                                <td class="ps-3 fw-semibold" th:text="${row.username}"></td>
+                                <td class="ps-4 fw-semibold" th:text="${row.username}"></td>
                                 <td th:each="pts : ${row.typePoints}">
-                                    <span th:if="${pts != null}" class="badge bg-warning text-dark" th:text="${pts}"></span>
-                                    <span th:if="${pts == null}" class="text-muted">—</span>
+                                    <span th:if="${pts != null}" class="badge badge-pts" th:text="${pts}"></span>
+                                    <span th:if="${pts == null}" style="color:#cbd5e1">—</span>
                                 </td>
-                                <td>
-                                    <span class="badge bg-success" th:text="${row.total} + ' pts'"></span>
-                                </td>
+                                <td><span class="badge badge-total" th:text="${row.total} + ' pts'"></span></td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(rewardRows)}">
-                                <td th:colspan="${#lists.size(rewardTypes) + 2}" class="text-center text-muted py-3">No rewards found</td>
+                                <td th:colspan="${#lists.size(rewardTypes) + 2}">
+                                    <div class="empty-state text-center">
+                                        <i class="bi bi-trophy"></i><span>No rewards recorded yet.</span>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Users + Pie chart -->
+    <div class="row g-3 mb-4">
 
         <!-- Users table -->
         <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white py-3">
-                    <h6 class="mb-0 fw-semibold"><i class="bi bi-people me-2 text-primary"></i>Users</h6>
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="card-header-title">
+                        <div class="card-header-icon icon-blue"><i class="bi bi-people-fill"></i></div>
+                        Users
+                    </div>
                 </div>
                 <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
+                    <table class="data-table">
+                        <thead>
                             <tr>
-                                <th class="ps-3">ID</th>
+                                <th class="ps-4">ID</th>
                                 <th>Username</th>
                                 <th>Email</th>
                                 <th>Role</th>
@@ -159,16 +338,20 @@
                         </thead>
                         <tbody>
                             <tr th:each="user : ${users}">
-                                <td class="ps-3 text-muted" th:text="${user.id}"></td>
-                                <td th:text="${user.username}"></td>
-                                <td class="text-muted" th:text="${user.email}"></td>
+                                <td class="ps-4" style="color:#94a3b8;font-size:.8rem" th:text="${user.id}"></td>
+                                <td class="fw-semibold" th:text="${user.username}"></td>
+                                <td style="color:#64748b" th:text="${user.email}"></td>
                                 <td>
-                                    <span th:if="${user.role == 'ADMIN'}" class="badge badge-admin">ADMIN</span>
-                                    <span th:if="${user.role != 'ADMIN'}" class="badge badge-user">USER</span>
+                                    <span th:if="${user.role == 'ADMIN'}" class="badge badge-admin">Admin</span>
+                                    <span th:if="${user.role != 'ADMIN'}" class="badge badge-user">User</span>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(users)}">
-                                <td colspan="4" class="text-center text-muted py-3">No users found</td>
+                                <td colspan="4">
+                                    <div class="empty-state text-center">
+                                        <i class="bi bi-person-x"></i><span>No users found.</span>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -176,28 +359,29 @@
             </div>
         </div>
 
-        <!-- User Rewards Breakdown -->
+        <!-- Rewards breakdown pie chart -->
         <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white py-3">
-                    <h6 class="mb-0 fw-semibold"><i class="bi bi-pie-chart-fill me-2 text-info"></i>User Rewards Breakdown</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="chartUserSelect" class="form-label fw-semibold">Select User</label>
-                            <select id="chartUserSelect" class="form-select">
-                                <option value="" disabled selected>Choose a user…</option>
-                                <option th:each="u : ${users}" th:value="${u.username}" th:text="${u.username}"></option>
-                            </select>
-                        </div>
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="card-header-title">
+                        <div class="card-header-icon icon-cyan"><i class="bi bi-pie-chart-fill"></i></div>
+                        User Rewards Breakdown
                     </div>
-                    <div class="row justify-content-center">
-                        <div id="chartNoData" class="col-12 text-center text-muted py-4">
-                            <i class="bi bi-pie-chart fs-1 opacity-25"></i>
-                            <div class="mt-2 small">Select a user to see their rewards breakdown.</div>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3" style="max-width:260px">
+                        <label for="chartUserSelect" class="form-label">Select User</label>
+                        <select id="chartUserSelect" class="form-select">
+                            <option value="" disabled selected>Choose a user…</option>
+                            <option th:each="u : ${users}" th:value="${u.username}" th:text="${u.username}"></option>
+                        </select>
+                    </div>
+                    <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                        <div id="chartNoData" class="empty-state text-center">
+                            <i class="bi bi-pie-chart"></i>
+                            <span>Select a user to view their breakdown.</span>
                         </div>
-                        <div id="chartWrapper" class="col-10 d-none">
+                        <div id="chartWrapper" class="d-none" style="width:100%;max-width:320px">
                             <canvas id="rewardPieChart"></canvas>
                         </div>
                     </div>
@@ -207,45 +391,48 @@
 
     </div>
 
-    <!-- Add User Rewards -->
-    <div class="row g-4 mt-2 mb-4">
+    <!-- Add User Reward -->
+    <div class="row g-3">
         <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h6 class="mb-0 fw-semibold"><i class="bi bi-plus-circle me-2 text-success"></i>Add User Reward</h6>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-title">
+                        <div class="card-header-icon icon-green"><i class="bi bi-plus-circle-fill"></i></div>
+                        Add User Reward
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div id="reward-alert" class="alert d-none" role="alert"></div>
+                <div class="card-body px-4 py-3">
+                    <div id="reward-alert" class="alert d-none mb-3" role="alert"></div>
                     <form id="add-reward-form" class="row g-3 align-items-end">
                         <div class="col-md-2">
-                            <label for="rewardUser" class="form-label fw-semibold">User</label>
+                            <label for="rewardUser" class="form-label">User</label>
                             <select id="rewardUser" class="form-select" required>
-                                <option value="" disabled selected>Select a user…</option>
+                                <option value="" disabled selected>Select…</option>
                                 <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"></option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="rewardBehavior" class="form-label fw-semibold">Behavior</label>
+                            <label for="rewardBehavior" class="form-label">Behavior</label>
                             <select id="rewardBehavior" class="form-select" required>
-                                <option value="" disabled selected>Select a behavior…</option>
+                                <option value="" disabled selected>Select…</option>
                                 <option th:each="type : ${rewardTypes}" th:value="${type}" th:text="${type}"></option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="rewardDescription" class="form-label fw-semibold">Description</label>
+                            <label for="rewardDescription" class="form-label">Description</label>
                             <input type="text" id="rewardDescription" class="form-control" placeholder="Optional description">
                         </div>
                         <div class="col-md-1">
-                            <label for="rewardPoints" class="form-label fw-semibold">Points</label>
+                            <label for="rewardPoints" class="form-label">Points</label>
                             <input type="number" id="rewardPoints" class="form-control" min="1" value="10" required>
                         </div>
                         <div class="col-md-2">
-                            <label for="rewardTitle" class="form-label fw-semibold">Title</label>
+                            <label for="rewardTitle" class="form-label">Title</label>
                             <input type="text" id="rewardTitle" class="form-control" placeholder="e.g. Great job!" required>
                         </div>
                         <div class="col-md-2">
-                            <button type="submit" class="btn btn-success w-100">
-                                <i class="bi bi-check-circle me-1"></i>Submit
+                            <button type="submit" class="btn-submit">
+                                <i class="bi bi-check-circle me-1"></i>Submit Reward
                             </button>
                         </div>
                     </form>
@@ -254,14 +441,18 @@
         </div>
     </div>
 
-</div>
+</div><!-- /page-body -->
+
+<script>
+    document.getElementById('navDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+</script>
 
 <script th:inline="javascript">
     (function () {
         const rewardTypes = /*[[${rewardTypes}]]*/ [];
         const rewardRows  = /*[[${rewardRows}]]*/ [];
 
-        const SLICE_COLORS = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#fd7e14'];
+        const SLICE_COLORS = ['#3b82f6', '#16a34a', '#0891b2', '#d97706', '#dc2626', '#7c3aed'];
 
         const byUser = {};
         rewardRows.forEach(function (row) {
@@ -283,15 +474,15 @@
                 }
             });
 
-            const noData   = document.getElementById('chartNoData');
-            const wrapper  = document.getElementById('chartWrapper');
-            const canvas   = document.getElementById('rewardPieChart');
+            const noData  = document.getElementById('chartNoData');
+            const wrapper = document.getElementById('chartWrapper');
+            const canvas  = document.getElementById('rewardPieChart');
 
             if (data.length === 0) {
                 noData.classList.remove('d-none');
                 wrapper.classList.add('d-none');
                 if (chart) { chart.destroy(); chart = null; }
-                noData.innerHTML = '<i class="bi bi-pie-chart fs-1 opacity-25"></i><div class="mt-2 small">No rewards recorded for this user yet.</div>';
+                noData.innerHTML = '<i class="bi bi-pie-chart"></i><span>No rewards recorded for this user yet.</span>';
                 return;
             }
 
@@ -310,7 +501,8 @@
                         data: data,
                         backgroundColor: colors,
                         borderColor: '#fff',
-                        borderWidth: 3
+                        borderWidth: 3,
+                        hoverOffset: 8
                     }]
                 },
                 options: {
@@ -318,9 +510,13 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: { padding: 20, font: { size: 13 } }
+                            labels: { padding: 20, font: { size: 12, family: 'Inter' }, color: '#475569' }
                         },
                         tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: 'Inter', size: 12 },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            padding: 10,
                             callbacks: {
                                 label: function (ctx) {
                                     const pct = Math.round(ctx.parsed / total * 100);
@@ -339,23 +535,20 @@
     document.getElementById('add-reward-form').addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const userId = document.getElementById('rewardUser').value;
-        const type = document.getElementById('rewardBehavior').value;
-        const points = parseInt(document.getElementById('rewardPoints').value, 10);
-        const title = document.getElementById('rewardTitle').value.trim();
+        const userId      = document.getElementById('rewardUser').value;
+        const type        = document.getElementById('rewardBehavior').value;
+        const points      = parseInt(document.getElementById('rewardPoints').value, 10);
+        const title       = document.getElementById('rewardTitle').value.trim();
         const description = document.getElementById('rewardDescription').value.trim();
-        const alertEl = document.getElementById('reward-alert');
+        const alertEl     = document.getElementById('reward-alert');
 
-        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfToken  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
         try {
             const response = await fetch('/api/rewards', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [csrfHeader]: csrfToken
-                },
+                headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
                 body: JSON.stringify({
                     title: title,
                     description: description,
