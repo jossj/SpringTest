@@ -154,20 +154,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="username : ${rewardUsers}">
-                                <td class="ps-3 fw-semibold" th:text="${username}"></td>
+                            <tr th:each="row : ${rewardRows}">
+                                <td class="ps-3 fw-semibold" th:text="${row['username']}"></td>
                                 <td th:each="type : ${rewardTypes}">
-                                    <span th:with="pts=${rewardMatrix[username] != null ? rewardMatrix[username][type] : null}">
-                                        <span th:if="${pts != null}" class="badge bg-warning text-dark" th:text="${pts}"></span>
-                                        <span th:if="${pts == null}" class="text-muted">—</span>
-                                    </span>
+                                    <span th:if="${row[type] != null}" class="badge bg-warning text-dark" th:text="${row[type]}"></span>
+                                    <span th:if="${row[type] == null}" class="text-muted">—</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-success"
-                                          th:text="${leaderboard[username]} + ' pts'"></span>
+                                    <span class="badge bg-success" th:text="${row['total']} + ' pts'"></span>
                                 </td>
                             </tr>
-                            <tr th:if="${#lists.isEmpty(rewardUsers)}">
+                            <tr th:if="${#lists.isEmpty(rewardRows)}">
                                 <td th:colspan="${#lists.size(rewardTypes) + 2}" class="text-center text-muted py-3">No rewards found</td>
                             </tr>
                         </tbody>
