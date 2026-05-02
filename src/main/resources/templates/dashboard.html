@@ -155,13 +155,13 @@
                         </thead>
                         <tbody>
                             <tr th:each="row : ${rewardRows}">
-                                <td class="ps-3 fw-semibold" th:text="${row['username']}"></td>
-                                <td th:each="type : ${rewardTypes}">
-                                    <span th:if="${row[type] != null}" class="badge bg-warning text-dark" th:text="${row[type]}"></span>
-                                    <span th:if="${row[type] == null}" class="text-muted">—</span>
+                                <td class="ps-3 fw-semibold" th:text="${row.username}"></td>
+                                <td th:each="pts : ${row.typePoints}">
+                                    <span th:if="${pts != null}" class="badge bg-warning text-dark" th:text="${pts}"></span>
+                                    <span th:if="${pts == null}" class="text-muted">—</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-success" th:text="${row['total']} + ' pts'"></span>
+                                    <span class="badge bg-success" th:text="${row.total} + ' pts'"></span>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(rewardRows)}">
