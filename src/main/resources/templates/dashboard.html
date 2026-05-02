@@ -103,43 +103,8 @@
 
     <div class="row g-4">
 
-        <!-- Users table -->
-        <div class="col-lg-5">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h6 class="mb-0 fw-semibold"><i class="bi bi-people me-2 text-primary"></i>Users</h6>
-                </div>
-                <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3">ID</th>
-                                <th>Username</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="user : ${users}">
-                                <td class="ps-3 text-muted" th:text="${user.id}"></td>
-                                <td th:text="${user.username}"></td>
-                                <td class="text-muted" th:text="${user.email}"></td>
-                                <td>
-                                    <span th:if="${user.role == 'ADMIN'}" class="badge badge-admin">ADMIN</span>
-                                    <span th:if="${user.role != 'ADMIN'}" class="badge badge-user">USER</span>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(users)}">
-                                <td colspan="4" class="text-center text-muted py-3">No users found</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
         <!-- Rewards tile -->
-        <div class="col-lg-7">
+        <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-white py-3">
                     <h6 class="mb-0 fw-semibold"><i class="bi bi-trophy me-2 text-success"></i>Rewards by Behavior</h6>
@@ -166,6 +131,41 @@
                             </tr>
                             <tr th:if="${#lists.isEmpty(rewardRows)}">
                                 <td th:colspan="${#lists.size(rewardTypes) + 2}" class="text-center text-muted py-3">No rewards found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users table -->
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-people me-2 text-primary"></i>Users</h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td class="ps-3 text-muted" th:text="${user.id}"></td>
+                                <td th:text="${user.username}"></td>
+                                <td class="text-muted" th:text="${user.email}"></td>
+                                <td>
+                                    <span th:if="${user.role == 'ADMIN'}" class="badge badge-admin">ADMIN</span>
+                                    <span th:if="${user.role != 'ADMIN'}" class="badge badge-user">USER</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="4" class="text-center text-muted py-3">No users found</td>
                             </tr>
                         </tbody>
                     </table>
