@@ -38,20 +38,19 @@ public class DashboardController {
                 .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
 
-        // per-user, per-type points matrix for the Rewards tile
-        List<RewardType> rewardTypes = Arrays.asList(RewardType.values());
-        Map<String, Map<RewardType, Integer>> rewardMatrix = rewards.stream()
+        // per-user, per-type points matrix for the Rewards tile (string keys for Thymeleaf map lookup)
+        List<String> rewardTypes = Arrays.stream(RewardType.values()).map(Enum::name).collect(Collectors.toList());
+        Map<String, Map<String, Integer>> rewardMatrix = rewards.stream()
                 .filter(r -> r.getUser() != null && r.getType() != null)
                 .collect(Collectors.groupingBy(
                         r -> r.getUser().getUsername(),
                         Collectors.groupingBy(
-                                Reward::getType,
+                                r -> r.getType().name(),
                                 Collectors.summingInt(r -> r.getPoints() != null ? r.getPoints() : 0)
                         )
                 ));
 
-        // collect ordered list of usernames that have at least one reward
-        List<String> rewardUsers = leaderboard.keySet().stream().collect(Collectors.toList());
+        List<String> rewardUsers = new ArrayList<>(leaderboard.keySet());
 
         model.addAttribute("users", users);
         model.addAttribute("rewards", rewards);
