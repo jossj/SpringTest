@@ -187,21 +187,25 @@
                 <div class="card-body">
                     <div id="reward-alert" class="alert d-none" role="alert"></div>
                     <form id="add-reward-form" class="row g-3 align-items-end">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="rewardUser" class="form-label fw-semibold">User</label>
                             <select id="rewardUser" class="form-select" required>
                                 <option value="" disabled selected>Select a user…</option>
                                 <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"></option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="rewardBehavior" class="form-label fw-semibold">Behavior</label>
                             <select id="rewardBehavior" class="form-select" required>
                                 <option value="" disabled selected>Select a behavior…</option>
                                 <option th:each="type : ${rewardTypes}" th:value="${type}" th:text="${type}"></option>
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
+                            <label for="rewardDescription" class="form-label fw-semibold">Description</label>
+                            <input type="text" id="rewardDescription" class="form-control" placeholder="Optional description">
+                        </div>
+                        <div class="col-md-1">
                             <label for="rewardPoints" class="form-label fw-semibold">Points</label>
                             <input type="number" id="rewardPoints" class="form-control" min="1" value="10" required>
                         </div>
@@ -230,6 +234,7 @@
         const type = document.getElementById('rewardBehavior').value;
         const points = parseInt(document.getElementById('rewardPoints').value, 10);
         const title = document.getElementById('rewardTitle').value.trim();
+        const description = document.getElementById('rewardDescription').value.trim();
         const alertEl = document.getElementById('reward-alert');
 
         const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
@@ -244,6 +249,7 @@
                 },
                 body: JSON.stringify({
                     title: title,
+                    description: description,
                     points: points,
                     type: type,
                     user: { id: parseInt(userId, 10) }
