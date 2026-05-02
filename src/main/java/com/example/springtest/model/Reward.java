@@ -20,6 +20,9 @@ public class Reward {
     private String description;
     private Integer points;
 
+    @Enumerated(EnumType.STRING)
+    private RewardType type;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;

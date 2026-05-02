@@ -1,6 +1,7 @@
 package com.example.springtest.controller;
 
 import com.example.springtest.model.Reward;
+import com.example.springtest.model.RewardType;
 import com.example.springtest.model.User;
 import com.example.springtest.service.RewardService;
 import com.example.springtest.service.UserService;
@@ -10,10 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -40,12 +38,30 @@ public class DashboardController {
                 .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
 
+        // per-user, per-type points matrix for the Rewards tile
+        List<RewardType> rewardTypes = Arrays.asList(RewardType.values());
+        Map<String, Map<RewardType, Integer>> rewardMatrix = rewards.stream()
+                .filter(r -> r.getUser() != null && r.getType() != null)
+                .collect(Collectors.groupingBy(
+                        r -> r.getUser().getUsername(),
+                        Collectors.groupingBy(
+                                Reward::getType,
+                                Collectors.summingInt(r -> r.getPoints() != null ? r.getPoints() : 0)
+                        )
+                ));
+
+        // collect ordered list of usernames that have at least one reward
+        List<String> rewardUsers = leaderboard.keySet().stream().collect(Collectors.toList());
+
         model.addAttribute("users", users);
         model.addAttribute("rewards", rewards);
         model.addAttribute("userCount", users.size());
         model.addAttribute("rewardCount", rewards.size());
         model.addAttribute("totalPoints", totalPoints);
         model.addAttribute("leaderboard", leaderboard);
+        model.addAttribute("rewardTypes", rewardTypes);
+        model.addAttribute("rewardMatrix", rewardMatrix);
+        model.addAttribute("rewardUsers", rewardUsers);
         return "dashboard";
     }
 }

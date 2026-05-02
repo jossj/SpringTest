@@ -138,35 +138,37 @@
             </div>
         </div>
 
-        <!-- Rewards table -->
+        <!-- Rewards tile -->
         <div class="col-lg-7">
             <div class="card shadow-sm">
                 <div class="card-header bg-white py-3">
-                    <h6 class="mb-0 fw-semibold"><i class="bi bi-trophy me-2 text-success"></i>Rewards</h6>
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-trophy me-2 text-success"></i>Rewards by Behavior</h6>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-3">ID</th>
-                                <th>Title</th>
-                                <th>Description</th>
-                                <th>Points</th>
-                                <th>User</th>
+                                <th class="ps-3">User</th>
+                                <th th:each="type : ${rewardTypes}" th:text="${type}"></th>
+                                <th class="fw-bold">Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="reward : ${rewards}">
-                                <td class="ps-3 text-muted" th:text="${reward.id}"></td>
-                                <td th:text="${reward.title}"></td>
-                                <td class="text-muted" th:text="${reward.description}"></td>
-                                <td>
-                                    <span class="badge bg-warning text-dark" th:text="${reward.points}"></span>
+                            <tr th:each="username : ${rewardUsers}">
+                                <td class="ps-3 fw-semibold" th:text="${username}"></td>
+                                <td th:each="type : ${rewardTypes}">
+                                    <span th:with="pts=${rewardMatrix[username] != null ? rewardMatrix[username][type] : null}">
+                                        <span th:if="${pts != null}" class="badge bg-warning text-dark" th:text="${pts}"></span>
+                                        <span th:if="${pts == null}" class="text-muted">—</span>
+                                    </span>
                                 </td>
-                                <td th:text="${reward.user != null ? reward.user.username : '-'}"></td>
+                                <td>
+                                    <span class="badge bg-success"
+                                          th:text="${leaderboard[username]} + ' pts'"></span>
+                                </td>
                             </tr>
-                            <tr th:if="${#lists.isEmpty(rewards)}">
-                                <td colspan="5" class="text-center text-muted py-3">No rewards found</td>
+                            <tr th:if="${#lists.isEmpty(rewardUsers)}">
+                                <td th:colspan="${#lists.size(rewardTypes) + 2}" class="text-center text-muted py-3">No rewards found</td>
                             </tr>
                         </tbody>
                     </table>
