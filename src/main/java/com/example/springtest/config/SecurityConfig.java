@@ -12,17 +12,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/public/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/api/public/**", "/login", "/css/**", "/js/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .httpBasic(httpBasic -> {})
-            // Allow H2 console to render in iframe
-            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-            // Disable CSRF for H2 console and API
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**", "/api/**")
-            );
+            .formLogin(form -> form
+                .loginPage("/login")
+                .defaultSuccessUrl("/dashboard", true)
+                .permitAll()
+            )
+            .httpBasic(basic -> {});
 
         return http.build();
     }
