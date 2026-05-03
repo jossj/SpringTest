@@ -289,7 +289,7 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th class="ps-4">User</th>
+                                <th class="ps-4">Student</th>
                                 <th th:each="type : ${rewardTypes}" th:text="${type}"></th>
                                 <th>Total</th>
                             </tr>
@@ -368,21 +368,23 @@
                 <div class="card-header">
                     <div class="card-header-title">
                         <div class="card-header-icon icon-cyan"><i class="bi bi-pie-chart-fill"></i></div>
-                        User Rewards Breakdown
+                        Student Rewards Breakdown
                     </div>
                 </div>
                 <div class="card-body d-flex flex-column">
                     <div class="mb-3" style="max-width:260px">
-                        <label for="chartUserSelect" class="form-label">Select User</label>
+                        <label for="chartUserSelect" class="form-label">Select Student</label>
                         <select id="chartUserSelect" class="form-select">
-                            <option value="" disabled selected>Choose a user…</option>
-                            <option th:each="u : ${users}" th:value="${u.username}" th:text="${u.username}"></option>
+                            <option value="" disabled selected>Choose a student…</option>
+                            <option th:each="s : ${students}"
+                                    th:value="${s.firstName + ' ' + s.lastName}"
+                                    th:text="${s.firstName + ' ' + s.lastName}"></option>
                         </select>
                     </div>
                     <div class="flex-grow-1 d-flex align-items-center justify-content-center">
                         <div id="chartNoData" class="empty-state text-center">
                             <i class="bi bi-pie-chart"></i>
-                            <span>Select a user to view their breakdown.</span>
+                            <span>Select a student to view their breakdown.</span>
                         </div>
                         <div id="chartWrapper" class="d-none" style="width:100%;max-width:320px">
                             <canvas id="rewardPieChart"></canvas>
@@ -401,17 +403,19 @@
                 <div class="card-header">
                     <div class="card-header-title">
                         <div class="card-header-icon icon-green"><i class="bi bi-plus-circle-fill"></i></div>
-                        Add User Reward
+                        Add Student Reward
                     </div>
                 </div>
                 <div class="card-body px-4 py-3">
                     <div id="reward-alert" class="alert d-none mb-3" role="alert"></div>
                     <form id="add-reward-form" class="row g-3 align-items-end">
                         <div class="col-md-2">
-                            <label for="rewardUser" class="form-label">User</label>
-                            <select id="rewardUser" class="form-select" required>
+                            <label for="rewardStudent" class="form-label">Student</label>
+                            <select id="rewardStudent" class="form-select" required>
                                 <option value="" disabled selected>Select…</option>
-                                <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"></option>
+                                <option th:each="s : ${students}"
+                                        th:value="${s.id}"
+                                        th:text="${s.firstName + ' ' + s.lastName}"></option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -485,7 +489,7 @@
                 noData.classList.remove('d-none');
                 wrapper.classList.add('d-none');
                 if (chart) { chart.destroy(); chart = null; }
-                noData.innerHTML = '<i class="bi bi-pie-chart"></i><span>No rewards recorded for this user yet.</span>';
+                noData.innerHTML = '<i class="bi bi-pie-chart"></i><span>No rewards recorded for this student yet.</span>';
                 return;
             }
 
@@ -538,7 +542,7 @@
     document.getElementById('add-reward-form').addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const userId      = document.getElementById('rewardUser').value;
+        const userId      = document.getElementById('rewardStudent').value;
         const type        = document.getElementById('rewardBehavior').value;
         const points      = parseInt(document.getElementById('rewardPoints').value, 10);
         const title       = document.getElementById('rewardTitle').value.trim();
@@ -557,7 +561,7 @@
                     description: description,
                     points: points,
                     type: type,
-                    user: { id: parseInt(userId, 10) }
+                    student: { id: parseInt(userId, 10) }
                 })
             });
 
