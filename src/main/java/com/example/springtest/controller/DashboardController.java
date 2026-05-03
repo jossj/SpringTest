@@ -3,6 +3,7 @@ package com.example.springtest.controller;
 import com.example.springtest.model.Reward;
 import com.example.springtest.model.RewardType;
 import com.example.springtest.model.User;
+import com.example.springtest.model.Student;
 import com.example.springtest.service.RewardService;
 import com.example.springtest.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -40,9 +41,9 @@ public class DashboardController {
         int totalPoints = rewards.stream().mapToInt(r -> r.getPoints() != null ? r.getPoints() : 0).sum();
 
         Map<String, Integer> leaderboard = rewards.stream()
-                .filter(r -> r.getUser() != null)
+                .filter(r -> r.getStudent() != null)
                 .collect(Collectors.groupingBy(
-                        r -> r.getUser().getUsername(),
+                        r -> r.getStudent().getFirstName() + " " + r.getStudent().getLastName(),
                         Collectors.summingInt(r -> r.getPoints() != null ? r.getPoints() : 0)
                 ))
                 .entrySet().stream()
@@ -53,9 +54,9 @@ public class DashboardController {
         List<String> rewardTypes = Arrays.stream(RewardType.values()).map(Enum::name).collect(Collectors.toList());
 
         Map<String, Map<String, Integer>> pointsByUserAndType = rewards.stream()
-                .filter(r -> r.getUser() != null && r.getType() != null)
+                .filter(r -> r.getStudent() != null && r.getType() != null)
                 .collect(Collectors.groupingBy(
-                        r -> r.getUser().getUsername(),
+                        r -> r.getStudent().getFirstName() + " " + r.getStudent().getLastName(),
                         Collectors.groupingBy(
                                 r -> r.getType().name(),
                                 Collectors.summingInt(r -> r.getPoints() != null ? r.getPoints() : 0)

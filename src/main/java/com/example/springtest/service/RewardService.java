@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface RewardService {
     List<Reward> getAllRewards();
     Optional<Reward> getRewardById(Long id);
-    List<Reward> getRewardsByUserId(Long userId);
+    List<Reward> getRewardsByStudentId(Long studentId);
     Reward createReward(Reward reward);
     void deleteReward(Long id);
 }
