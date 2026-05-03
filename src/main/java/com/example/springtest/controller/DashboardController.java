@@ -4,6 +4,7 @@ import com.example.springtest.model.Reward;
 import com.example.springtest.model.RewardType;
 import com.example.springtest.model.User;
 import com.example.springtest.model.Student;
+import com.example.springtest.repository.StudentRepository;
 import com.example.springtest.service.RewardService;
 import com.example.springtest.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +34,12 @@ public class DashboardController {
 
     private final UserService userService;
     private final RewardService rewardService;
+    private final StudentRepository studentRepository;
 
     @GetMapping
     public String dashboard(Model model) {
         List<User> users = userService.getAllUsers();
+        List<Student> students = studentRepository.findAll();
         List<Reward> rewards = rewardService.getAllRewards();
         int totalPoints = rewards.stream().mapToInt(r -> r.getPoints() != null ? r.getPoints() : 0).sum();
 
@@ -75,8 +78,10 @@ public class DashboardController {
                 .collect(Collectors.toList());
 
         model.addAttribute("users", users);
+        model.addAttribute("students", students);
         model.addAttribute("rewards", rewards);
         model.addAttribute("userCount", users.size());
+        model.addAttribute("studentCount", students.size());
         model.addAttribute("rewardCount", rewards.size());
         model.addAttribute("totalPoints", totalPoints);
         model.addAttribute("leaderboard", leaderboard);
