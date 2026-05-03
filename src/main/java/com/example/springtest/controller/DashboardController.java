@@ -77,8 +77,22 @@ public class DashboardController {
                 })
                 .collect(Collectors.toList());
 
+        List<Map<String, Object>> studentRows = students.stream()
+                .map(s -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("id", s.getId());
+                    row.put("firstName", s.getFirstName());
+                    row.put("lastName", s.getLastName());
+                    row.put("email", s.getEmail());
+                    row.put("classRoomName", s.getClassRoom() != null ? s.getClassRoom().getName() : "");
+                    row.put("yearLevel", s.getClassRoom() != null ? s.getClassRoom().getYearLevel().name() : "");
+                    return row;
+                })
+                .collect(Collectors.toList());
+
         model.addAttribute("users", users);
         model.addAttribute("students", students);
+        model.addAttribute("studentRows", studentRows);
         model.addAttribute("rewards", rewards);
         model.addAttribute("userCount", users.size());
         model.addAttribute("studentCount", students.size());

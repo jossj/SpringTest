@@ -353,44 +353,46 @@
     <!-- Users + Pie chart -->
     <div class="row g-3 mb-4">
 
-        <!-- Users table -->
+        <!-- Student Filter -->
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-header">
                     <div class="card-header-title">
-                        <div class="card-header-icon icon-blue"><i class="bi bi-people-fill"></i></div>
-                        Users
+                        <div class="card-header-icon icon-blue"><i class="bi bi-funnel-fill"></i></div>
+                        Students by Class
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th class="ps-4">ID</th>
-                                <th>Username</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="user : ${users}">
-                                <td class="ps-4" style="color:#94a3b8;font-size:.8rem" th:text="${user.id}"></td>
-                                <td class="fw-semibold" th:text="${user.username}"></td>
-                                <td style="color:#64748b" th:text="${user.email}"></td>
-                                <td>
-                                    <span th:if="${user.role == 'ADMIN'}" class="badge badge-admin">Admin</span>
-                                    <span th:if="${user.role != 'ADMIN'}" class="badge badge-user">User</span>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(users)}">
-                                <td colspan="4">
-                                    <div class="empty-state text-center">
-                                        <i class="bi bi-person-x"></i><span>No users found.</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="card-body d-flex flex-column px-4 py-3">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label for="filterYearLevel" class="form-label">Year Level</label>
+                            <select id="filterYearLevel" class="form-select">
+                                <option value="">All Year Levels</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="filterClassRoom" class="form-label">Class Room</label>
+                            <select id="filterClassRoom" class="form-select">
+                                <option value="">All Classes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;flex:1">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Name</th>
+                                    <th>Email</th>
+                                    <th>Year</th>
+                                    <th>Class</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentFilterBody"></tbody>
+                        </table>
+                        <div id="studentFilterEmpty" class="empty-state text-center">
+                            <i class="bi bi-person-x"></i><span>No students found.</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -619,6 +621,82 @@
             });
         });
     })();
+</script>
+
+<script th:inline="javascript">
+(function () {
+    const allStudents = /*[[${studentRows}]]*/ [];
+
+    const classroomsByYear = {};
+    allStudents.forEach(function (s) {
+        if (!s.yearLevel) return;
+        if (!classroomsByYear[s.yearLevel]) classroomsByYear[s.yearLevel] = [];
+        if (classroomsByYear[s.yearLevel].indexOf(s.classRoomName) === -1) {
+            classroomsByYear[s.yearLevel].push(s.classRoomName);
+        }
+    });
+
+    const yearLevels = Object.keys(classroomsByYear).sort(function (a, b) {
+        return (parseInt(a.split('_')[1], 10) || 0) - (parseInt(b.split('_')[1], 10) || 0);
+    });
+
+    const yearSelect  = document.getElementById('filterYearLevel');
+    const classSelect = document.getElementById('filterClassRoom');
+    const tbody       = document.getElementById('studentFilterBody');
+    const emptyState  = document.getElementById('studentFilterEmpty');
+
+    yearLevels.forEach(function (yl) {
+        const opt = document.createElement('option');
+        opt.value = yl;
+        opt.textContent = yl.replace('YEAR_', 'Year ');
+        yearSelect.appendChild(opt);
+    });
+
+    function escHtml(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function renderStudents() {
+        var yl  = yearSelect.value;
+        var cls = classSelect.value;
+        var filtered = allStudents.filter(function (s) {
+            return (!yl || s.yearLevel === yl) && (!cls || s.classRoomName === cls);
+        });
+        if (filtered.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.classList.remove('d-none');
+        } else {
+            emptyState.classList.add('d-none');
+            tbody.innerHTML = filtered.map(function (s) {
+                var yearLabel = s.yearLevel ? s.yearLevel.replace('YEAR_', 'Year ') : '—';
+                return '<tr>'
+                    + '<td class="ps-4 fw-semibold">' + escHtml(s.firstName + ' ' + s.lastName) + '</td>'
+                    + '<td style="color:#64748b">' + escHtml(s.email) + '</td>'
+                    + '<td><span class="badge badge-user">' + escHtml(yearLabel) + '</span></td>'
+                    + '<td>' + escHtml(s.classRoomName || '—') + '</td>'
+                    + '</tr>';
+            }).join('');
+        }
+    }
+
+    yearSelect.addEventListener('change', function () {
+        var yl = this.value;
+        classSelect.innerHTML = '<option value="">All Classes</option>';
+        if (yl && classroomsByYear[yl]) {
+            classroomsByYear[yl].slice().sort().forEach(function (cls) {
+                var opt = document.createElement('option');
+                opt.value = cls;
+                opt.textContent = cls;
+                classSelect.appendChild(opt);
+            });
+        }
+        renderStudents();
+    });
+
+    classSelect.addEventListener('change', renderStudents);
+    renderStudents();
+})();
 </script>
 
 <script>
