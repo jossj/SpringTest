@@ -25,9 +25,9 @@ public class RewardController {
                 .orElseThrow(() -> new RuntimeException("Reward not found with id: " + id));
     }
 
-    @GetMapping("/user/{userId}")
-    public List<Reward> getRewardsByUser(@PathVariable Long userId) {
-        return rewardService.getRewardsByUserId(userId);
+    @GetMapping("/student/{studentId}")
+    public List<Reward> getRewardsByStudent(@PathVariable Long studentId) {
+        return rewardService.getRewardsByStudentId(studentId);
     }
 
     @PostMapping

@@ -27,8 +27,8 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
-    public List<Reward> getRewardsByUserId(Long userId) {
-        return rewardRepository.findByUserId(userId);
+    public List<Reward> getRewardsByStudentId(Long studentId) {
+        return rewardRepository.findByStudentId(studentId);
     }
 
     @Override
