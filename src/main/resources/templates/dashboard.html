@@ -411,9 +411,6 @@
                         <label for="chartUserSelect" class="form-label">Select Student</label>
                         <select id="chartUserSelect" class="form-select">
                             <option value="" disabled selected>Choose a student…</option>
-                            <option th:each="s : ${students}"
-                                    th:value="${s.firstName + ' ' + s.lastName}"
-                                    th:text="${s.firstName + ' ' + s.lastName}"></option>
                         </select>
                     </div>
                     <div class="flex-grow-1 d-flex align-items-center justify-content-center">
@@ -553,6 +550,16 @@
 
         let chart = null;
 
+        const noData  = document.getElementById('chartNoData');
+        const wrapper = document.getElementById('chartWrapper');
+
+        window.resetPieChart = function () {
+            if (chart) { chart.destroy(); chart = null; }
+            noData.innerHTML = '<i class="bi bi-pie-chart"></i><span>Select a student to view their breakdown.</span>';
+            noData.classList.remove('d-none');
+            wrapper.classList.add('d-none');
+        };
+
         document.getElementById('chartUserSelect').addEventListener('change', function () {
             const username = this.value;
             const pts = byUser[username] || new Array(rewardTypes.length).fill(0);
@@ -566,8 +573,6 @@
                 }
             });
 
-            const noData  = document.getElementById('chartNoData');
-            const wrapper = document.getElementById('chartWrapper');
             const canvas  = document.getElementById('rewardPieChart');
 
             if (data.length === 0) {
@@ -677,6 +682,29 @@
                     + '<td>' + escHtml(s.classRoomName || '—') + '</td>'
                     + '</tr>';
             }).join('');
+        }
+        updateChartSelect(filtered);
+    }
+
+    function updateChartSelect(filtered) {
+        var chartSelect = document.getElementById('chartUserSelect');
+        var prevValue = chartSelect.value;
+        chartSelect.innerHTML = '<option value="" disabled>Choose a student…</option>';
+        filtered.forEach(function (s) {
+            var name = s.firstName + ' ' + s.lastName;
+            var opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            chartSelect.appendChild(opt);
+        });
+        var stillPresent = filtered.some(function (s) {
+            return (s.firstName + ' ' + s.lastName) === prevValue;
+        });
+        if (stillPresent) {
+            chartSelect.value = prevValue;
+        } else {
+            chartSelect.value = '';
+            if (prevValue && window.resetPieChart) window.resetPieChart();
         }
     }
 
